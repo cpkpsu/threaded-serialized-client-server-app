@@ -1,0 +1,128 @@
+import java.io.Serializable;
+import java.text.DecimalFormat;
+
+/* Flattens/serializes data in order to send it over the network
+ * before deserializing it so end user can read it
+ */
+public class Vehicle implements Serializable {
+
+// Initializes variables
+	
+	private String make;
+	private String model;
+	private int year;
+	private double purchaseprice;
+	private int capacity;	
+	private double fuelEfficiency;
+	private double miles;
+	private double fuelprice;
+	private int lifespan;
+	private double annualConsumption;
+	private double annualFuelCost;
+	private double lifetimeOperatingCost;
+	private double totalOwnershipCost;
+	private static DecimalFormat df = new DecimalFormat("0.##");
+	
+	/* 
+	 * Annual fuel consumed = Annual miles driven / Fuel efficiency
+	 * Annual fuel cost = Fuel price per gallon x Annual fuel consumed
+	 * Lifetime operating cost = Vehicle life expectancy x Annual fuel cost
+	 * Total vehicle ownership cost = Purchase price + Lifetime operating cost
+	 */
+	
+	
+
+	//Sets up the client socket that will be used by each ServerVehicle instance
+	public Vehicle(String pMake, String pModel, int pYear, double pPurchasePrice, int pCapacity, double pFuelEfficiency, int pMiles, double pFuelPrice, int pLifespan) {
+	
+	make = pMake;
+	model = pModel;
+	year = pYear;
+	purchaseprice = pPurchasePrice;
+	capacity = pCapacity;
+	fuelEfficiency = pFuelEfficiency;
+	miles = pMiles;
+	fuelprice = pFuelPrice;
+	lifespan = pLifespan;
+}
+
+	public Vehicle() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public String getMake() {
+		return make;
+	}
+	public void setMake(String make) {
+		this.make = make;
+	}
+	public String getModel() {
+		return model;
+	}
+	public void setModel(String model) {
+		this.model = model;
+	}
+	public int getYear() {
+		return year;
+	}
+	public void setYear (int year) {
+		this.year = year;
+	}
+	public double getPurchasePrice() {
+		return purchaseprice;
+	}
+	public void setPurchasePrice(double purchaseprice) {
+		this.purchaseprice = purchaseprice;
+	}
+	public int getCapacity() {
+		return capacity;
+	}
+	public void setCapacity(int Capacity) {
+		this.capacity = capacity;
+	}
+	public double getFuelEfficiency() {
+		return fuelEfficiency;
+	}
+	public void setfuelefficiency(double fuelEfficiency) {
+		this.fuelEfficiency = fuelEfficiency;
+	}
+	public double getMiles() {
+		return miles;
+	}
+	public void setMiles(double miles) {
+		this.miles = miles;
+	}
+	public double getFuelPrice() {
+		return fuelprice;
+	}
+	public void setFuelPrice(double fuelprice) {
+		this.fuelprice = fuelprice;
+	}
+	public int getLifespan() {
+		return lifespan;
+	}
+	public void setLifespan(int lifespan) {
+		this.lifespan = lifespan;
+	}
+	public String getAnnualConsumption() {
+		annualConsumption = miles/fuelEfficiency;
+		String returnAnnualConsumption = df.format(annualConsumption);
+		return returnAnnualConsumption;
+	}
+	public String getAnnualFuelCost() {
+		annualFuelCost = fuelprice*annualConsumption;
+		String returnAnnualFuelCost = df.format(annualFuelCost);
+		return returnAnnualFuelCost;
+	}
+	public String getLifetimeOperatingCost() {
+		lifetimeOperatingCost = lifespan * annualFuelCost;
+		String returnLifetimeOperatingCost = df.format(lifetimeOperatingCost);
+		return returnLifetimeOperatingCost;
+	}
+	public String getTotalOwnershipCost() {
+		totalOwnershipCost = purchaseprice+lifetimeOperatingCost;
+		String returnTotalOwnershipCost=df.format(totalOwnershipCost);
+		return returnTotalOwnershipCost;
+	}
+	}
+
