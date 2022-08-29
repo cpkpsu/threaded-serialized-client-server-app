@@ -1,0 +1,141 @@
+// JavaScript Document
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+/*
+ * Multiple instances of the client program can connect to the server program and 
+ * each can have independent processing handled by the same server code running as threads
+ */ 
+public class ClientVehicle {
+
+
+	public static void main(String[] args) {
+		try {
+		//Will display a message saying client started and waiting for connection to server
+			System.out.println("Client started");
+			System.out.println("Waiting for a connection to the server");
+			
+			InetAddress localAddress = InetAddress.getLocalHost();
+			
+			//Starts connection to port 8000...7000 already in use
+			
+			Socket clientSocket = new Socket(localAddress, 8000);
+			System.out.println("Successfully connected to the server");
+			
+			//Read from client console
+			ObjectOutputStream streamOut = new ObjectOutputStream(clientSocket.getOutputStream());
+			//Flushes output stream
+			streamOut.flush();
+			ObjectInputStream streamIn = new ObjectInputStream(clientSocket.getInputStream());
+			
+			Scanner consoleIn = new Scanner(System.in);
+
+			String ind = "";
+
+			do {				
+				//Declares an instance of the Vehicle class				
+				Vehicle serializableVehicle = new Vehicle();		
+
+				//Reads and validates input from the client console to populate Vehicle
+					serializableVehicle.setMake(validateStringInput("Enter make: ",consoleIn));
+					serializableVehicle.setModel(validateStringInput("Enter model: ",consoleIn));
+					serializableVehicle.setYear(validatePosIntegerInput("Enter year: ",consoleIn));
+					serializableVehicle.setPurchasePrice(validatePosIntegerInput("Enter purchase price: ",consoleIn));
+					serializableVehicle.setCapacity(validatePosIntegerInput("Enter fuel tank capacity: ",consoleIn));
+					serializableVehicle.setfuelefficiency(validatePosDoubleInput("Enter fuel efficiency", consoleIn));
+					serializableVehicle.setMiles(validatePosIntegerInput("Enter annual miles driven: ",consoleIn));
+					serializableVehicle.setFuelPrice(validatePosDoubleInput("Enter fuel price: ",consoleIn));
+					serializableVehicle.setLifespan(validatePosIntegerInput("Enter vehicle life expectancy: ",consoleIn));
+
+					//Resets scanner in client console
+					consoleIn.nextLine();
+
+					//Passes the instance of Vehicle to the to the server for processing
+					
+					streamOut.writeObject(serializableVehicle);
+
+					//Gets the returned instance of Vehicle from the server
+					
+					while ((serializableVehicle = (Vehicle)streamIn.readObject()) != null) {
+						//Displays responses from the server
+						System.out.println("Vehicle annual fuel consumed is: " + serializableVehicle.getAnnualConsumption());
+						System.out.println("Vehicle annual fuel cost is: " + serializableVehicle.getAnnualFuelCost());
+						System.out.println("Vehicle lifetime operating cost is: " + serializableVehicle.getLifetimeOperatingCost());
+						System.out.println("Vehicle total ownership cost is: " + serializableVehicle.getTotalOwnershipCost());
+
+						//Exits the loop after instance of Vehicle has been retrieved 
+						break;
+					}	
+
+					//Asks the user if they want to continue or quit
+					do {
+						ind = validateStringInput("Enter Y to continue. Enter X to quit.", consoleIn);
+					} while ((!ind.toUpperCase().equals("Y")) && ! ind.toUpperCase().equals("X"));
+				} while ((!ind.toUpperCase().equals("X")));
+
+				//When the user is done and wants to quit, closes the client's connection to the server
+				clientSocket.close();
+
+				//Stops the client
+				System.out.println("Client stopped");
+				System.exit(0);
+			}
+			catch (ClassNotFoundException ex) {
+				System.out.println("Client stopped");
+				System.exit(0);
+			}
+			catch (SocketException ex) {
+				System.out.println("Client stopped");
+				System.exit(0);
+			}
+			catch (IOException ex) {
+				System.out.println("Exception occurred");
+				ex.printStackTrace();
+			}	
+		}
+
+		//Method repeatedly displays the prompt until valid positive int input is entered
+		public static int validatePosIntegerInput(String prompt, Scanner in) {
+			int var = 0;
+			do {
+				System.out.println(prompt);
+				while (!in.hasNextInt() || !in.hasNextDouble()) {
+					System.out.println(prompt);
+					in.next();
+				}
+				var = in.nextInt();
+			} while (var < 0);
+			return var;
+		}
+
+		//Method repeatedly displays the prompt until valid positive double input is entered
+		public static double validatePosDoubleInput(String prompt, Scanner in) {
+			double var = 0.0;
+			do {
+				System.out.println(prompt);
+				while (!in.hasNextDouble()) {
+					System.out.println(prompt);
+					in.next();
+				} 
+				var = in.nextDouble();
+			} while (var < 0);
+			return var;
+		}
+
+		//Method repeatedly displays the prompt until valid String input is entered
+		public static String validateStringInput(String prompt, Scanner in) {
+			boolean valid = false;
+			String var = "";
+			do {
+				System.out.println(prompt);
+				while (in.hasNextDouble() || in.hasNextInt()) {
+					System.out.println(prompt);
+					in.nextLine();
+				}
+				var = in.nextLine();
+				valid = true;
+			} while (!valid);
+			return var;
+		}
+	}
