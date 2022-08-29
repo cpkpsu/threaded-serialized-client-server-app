@@ -1,0 +1,98 @@
+import java.io.*;
+import java.net.*;
+
+
+public class ServerVehicle implements Runnable {
+//Sets up the client socket that each ServerVehicle instance will use
+	
+	public static Socket clientSocket;
+
+//Creates a constructor for each client connection to be assigned to the client	
+	
+	public ServerVehicle(Socket pClientSocket) {
+		clientSocket = pClientSocket;
+
+//When clients connect, the main() method is responsible for creating and starting threads
+	}
+	public static void main(String[] args) {
+		try {
+		//Displays a message that the server started
+			
+			System.out.println("Server started.");
+			
+			//Listens to connection client socket 8000...7000 used by other project
+			
+			ServerSocket serverSocket = new ServerSocket(8000);
+			System.out.println("Waiting for a connection to the client.");
+			
+			while(true) {
+				
+			//Assigns the current client connection to the clientSocket
+				
+				clientSocket = serverSocket.accept();
+				
+				//Will display message saying successfully connected to the client
+				
+				System.out.println("Successfully connected to the client.");
+				
+				ServerVehicle tss = new ServerVehicle(clientSocket);
+				
+				//Starts the thread
+				
+				new Thread(tss).start();
+			}
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+			}
+		}
+	@Override
+	public void run() {
+		try {
+			System.out.println("Connected to a client using thread: " + Thread.currentThread());
+			
+			ObjectInputStream streamIn = new ObjectInputStream(clientSocket.getInputStream());
+			ObjectOutputStream streamOut = new ObjectOutputStream(clientSocket.getOutputStream());
+			do {
+				
+				Vehicle serializableVehicle =  new Vehicle();
+				;
+				
+				
+				try {
+					while ((serializableVehicle = (Vehicle)streamIn.readObject()) != null) {
+						
+						System.out.println("Incoming vehicle model is: " + Thread.currentThread() + "is" + serializableVehicle.getMake());
+						System.out.println("Incoming vehicle make is: " + Thread.currentThread() + "is" + serializableVehicle.getModel());
+						System.out.println("Incoming vehicle year is: " + Thread.currentThread() + "is" + serializableVehicle.getYear());
+						System.out.println("Incoming vehicle purchase price is: " + Thread.currentThread() + "is" + serializableVehicle.getPurchasePrice());
+						System.out.println("Incoming vehicle fuel tank capacity is: " + Thread.currentThread() + "is" + serializableVehicle.getCapacity());
+						System.out.println("Incoming vehicle fuel efficiency is: " + Thread.currentThread() + "is" + serializableVehicle.getFuelEfficiency());
+						System.out.println("Incoming vehicle annual miles driven is: " + Thread.currentThread() + "is" + serializableVehicle.getMiles());
+						System.out.println("Incoming fuel price is: " + Thread.currentThread() + "is" + serializableVehicle.getFuelPrice());
+						System.out.println("Incoming vehicle life expectancy is: " + Thread.currentThread() + "is" + serializableVehicle.getLifespan());
+						
+						streamOut.writeObject(serializableVehicle);
+					}
+				}
+				catch (EOFException ex) {
+				System.out.println(Thread.currentThread() + " terminated");
+
+					
+				//If the EOFException is raised, the client is terminated and the server instance can break from the loop, 
+				//but will continue to run to support other client connections					
+				break;
+				
+				}
+			}
+			while (true);
+			//Terminates thread by closing the socket
+		}
+		catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+	}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+}
